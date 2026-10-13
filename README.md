@@ -1,23 +1,22 @@
-# Intelligent-System-Project
-Comparison of CPU, local GPU, and cloud GPU execution for a selected workload
-About
+# CPU vs Local GPU vs Cloud GPU: Conjugate Gradient
 
-This project aims to compare the performance of a computationally intensive workload across CPU, local GPU, and cloud GPU environments.
+## About
+This project evaluates the performance and scalability of the Conjugate Gradient (CG) method for solving large sparse linear systems across CPU, local GPU, and cloud GPU environments.
 
-The objective is to analyze execution time, performance improvements, and the impact of workload size on different computing environments.
+## Objectives
+- Compare CG performance across CPU, local GPU, and cloud GPU.
+- Analyze the impact of problem size and matrix sparsity on execution time.
+- Measure speedup, convergence, and memory usage.
+- Investigate data-transfer overhead and cloud execution cost.
 
-Objectives
+## Methodology
+- Generate sparse, symmetric positive-definite linear systems.
+- Execute CG using compatible CPU and GPU implementations.
+- Benchmark different problem sizes under consistent accuracy requirements.
+- Analyze and visualize the experimental results.
 
-Compare CPU, local GPU, and cloud GPU performance.
+## Technologies
+Python, NumPy, SciPy, CUDA-compatible GPU libraries, and cloud GPU platforms (to be finalized).
 
-Study the impact of workload size on execution time.
-
-Analyze performance differences and computational overheads.
-
-Project Status
-
-Currently in the literature survey and workload selection phase.
-
-Technologies
-
-Python, CUDA, Git, and cloud GPU platforms (to be finalized).
+## Project Status
+**Current phase:** Literature review and experimental design.
