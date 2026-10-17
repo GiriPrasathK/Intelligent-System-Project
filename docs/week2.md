@@ -1,69 +1,32 @@
-# Week 2: GPU Architecture and Parallel Programming
+# Week 2 Project Work: Identifying a GPU-Suitable Workload
 
-## 1. Objective
+## 1. Selected Workload
+The selected workload is the Conjugate Gradient (CG) method for solving large sparse symmetric positive-definite linear systems of the form Ax = b.
 
-To study GPU architecture, Streaming Multiprocessors (SMs), CUDA thread organization, SIMT execution, parallelism, and synchronization.
+## 2. Computational Requirements
+The CG method repeatedly performs sparse matrix-vector multiplication, vector updates, dot products, and convergence checks. These operations are repeated until the solution satisfies the specified convergence criterion.
 
-## 2. GPU Architecture and Streaming Multiprocessors
+## 3. Suitability for GPU Acceleration
+Sparse matrix-vector multiplication and vector updates expose data parallelism because multiple output elements can often be computed independently. Dot products can also use parallel computation followed by a reduction.
 
-A GPU contains multiple Streaming Multiprocessors (SMs). These units execute groups of GPU threads and use hardware resources to schedule and execute parallel workloads.
+However, irregular memory access, synchronization, data-transfer overhead, and dependencies between iterations can affect GPU performance.
 
-The number of SMs and their internal resources depend on the GPU model and architecture.
+## 4. Proposed Experimental Comparison
+The project will investigate the CG workload across:
+- CPU execution
+- Local GPU execution
+- Cloud GPU execution
 
-## 3. Threads, Blocks, and Grids
+The comparison will examine execution time, problem size, convergence accuracy, and computational overhead. Cloud cost and resource utilization will be measured where feasible.
 
-CUDA organizes kernel execution using three levels:
+## 5. Initial Research Questions
+1. How does CG execution time change as matrix size increases?
+2. Under what conditions does GPU execution outperform CPU execution?
+3. How do memory access and data-transfer overhead affect performance?
+4. What additional overheads arise when executing CG on a cloud GPU?
 
-- **Thread:** An individual execution instance.
-- **Block:** A group of threads that can cooperate and synchronize.
-- **Grid:** The collection of blocks launched for a kernel.
+## 6. Conclusion
+The CG method is a suitable candidate for studying CPU–GPU performance because it combines parallel numerical operations with iterative dependencies. Experimental measurements will be used to determine the actual performance differences.
 
-The hierarchy is:
-
-Grid → Blocks → Threads
-
-For a one-dimensional grid, the global thread index is commonly calculated as:
-
-`i = blockIdx.x * blockDim.x + threadIdx.x`
-
-A bounds check is needed when the calculated index may exceed the input size.
-
-## 4. SIMT Execution Model
-
-SIMT stands for Single Instruction, Multiple Threads. Threads execute similar instructions on different data elements and are scheduled in groups called warps.
-
-Branch divergence occurs when threads in the same warp take different execution paths, potentially reducing execution efficiency.
-
-## 5. Parallelism and Synchronization
-
-Parallelism allows independent calculations to execute concurrently. However, some operations depend on results produced by other threads.
-
-CUDA provides `__syncthreads()` to synchronize threads within the same thread block. It is not a general grid-wide synchronization mechanism.
-
-## 6. Connection to the Conjugate Gradient Project
-
-The Conjugate Gradient method solves systems of linear equations:
-
-`Ax = b`
-
-For standard CG, the matrix must be symmetric positive definite.
-
-Important operations include:
-
-- Sparse matrix-vector multiplication
-- Vector updates
-- Dot products and reductions
-
-Different matrix rows or vector elements can often be processed in parallel. Dot products require reduction operations, and dependencies between CG iterations limit how much of the algorithm can execute concurrently.
-
-## 7. Learning Outcomes
-
-- Understood the role of SMs in GPU execution.
-- Learned the grid, block, and thread hierarchy.
-- Understood global thread indexing and bounds checking.
-- Studied SIMT, warps, and branch divergence.
-- Identified synchronization and reduction challenges in CG.
-
-## 8. Status
-
-Week 2 theory completed. Practical CUDA implementation and hardware-specific experiments are pending.
+## 7. Status
+Week 2 project work: workload selected and its GPU suitability documented. Implementation and benchmarking remain pending.
