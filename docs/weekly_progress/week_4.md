@@ -1,71 +1,98 @@
-# Week 4: GPU Memory Hierarchy and Memory Management
+# Week 4: GPU Memory Hierarchy and Memory Optimization
 
-## 1. Objective
+## 1. Objectives
 
-Understand the GPU memory hierarchy, host-device memory transfers, memory access patterns, and synchronization. Investigate how memory transfer overhead affects GPU application performance.
+- Understand the GPU memory hierarchy.
+- Study host-to-device and device-to-host memory transfers.
+- Understand coalesced and non-coalesced memory access.
+- Explore shared memory and thread synchronization.
 
-## 2. Concepts Studied
+## 2. GPU Memory Hierarchy
 
-- GPU registers
-- Shared memory
-- Global memory
-- Constant memory
-- Host-to-device memory transfer
-- Device-to-host memory transfer
-- Memory coalescing
-- CUDA synchronization
+CUDA provides different types of memory:
 
-## 3. Practical Exercise: Memory Transfer and Kernel Timing
+- **Registers:** Fast, private storage for individual threads.
+- **Shared Memory:** Fast on-chip memory shared among threads within a block.
+- **Global Memory:** Large GPU memory accessible by all threads.
+- **Constant Memory:** Read-only memory optimized for constant data access.
 
-**Program:** CUDA Vector Addition with Memory Transfer Timing
+## 3. Practical 1: Host-Device Memory Transfer
 
-The vector addition program was extended to measure host-to-device transfer time, GPU kernel execution time, device-to-host transfer time, and total wall-clock execution time.
+**Objective:** Measure data transfer and kernel execution time.
 
-The experiment used CUDA events to measure GPU operations and a host-side high-resolution clock to measure the complete execution.
+**Environment:** Google Colab – NVIDIA Tesla T4.
 
-## 4. Experimental Environment
-
-- Platform: Google Colab
-- GPU: NVIDIA Tesla T4
-- CUDA Toolkit: 13.0
-- Programming language: CUDA C++
-- Number of elements: 1,000,000
-- Data type: float (32-bit)
+**Configuration:**
+- Elements: 1,000,000
+- Data type: float32
 - Threads per block: 256
-- Number of blocks: 3,907
+- Blocks: 3,907
 
-## 5. Experimental Results
+**Results:**
 
-| Measurement | Execution Time |
+| Operation | Time (ms) |
 |---|---:|
-| Host-to-Device Transfer | 2.64141 ms |
-| GPU Kernel Execution | 0.146976 ms |
-| Device-to-Host Transfer | 0.987552 ms |
-| Total Wall Time | 2.90553 ms |
+| Host-to-Device (H2D) | 2.64141 |
+| Kernel execution | 0.146976 |
+| Device-to-Host (D2H) | 0.987552 |
+| Total wall time | 2.90553 |
 
-The program successfully completed execution and passed output validation.
+**Observation:** Data transfer overhead can be significantly higher than kernel execution time.
 
-## 6. Analysis
+**Validation:** PASS
 
-The experiment demonstrates that memory transfer overhead can be significant compared with GPU computation time.
+## 4. Practical 2: Coalesced vs Non-Coalesced Memory Access
 
-The host-to-device transfer involved two input vectors, whereas the device-to-host transfer involved one output vector. This explains why the measured H2D transfer time was higher in this experiment.
+**Objective:** Compare GPU memory access patterns.
 
-The GPU kernel performed vector addition in approximately 0.147 ms. The measured transfer times demonstrate the importance of considering data movement when evaluating GPU application performance.
+**Configuration:**
+- Elements processed: 1,048,576
+- Stride: 32
+- Threads per block: 256
+- Blocks: 4,096
+- Repetitions: 100
 
-The individual transfer and kernel measurements were collected separately from the total wall-clock measurement. Therefore, their sum is not expected to exactly match the total wall-clock time.
+**Results:**
 
-These results are preliminary observations from a single run and require repeated measurements for reliable performance analysis.
+| Access Pattern | Average Time (ms) |
+|---|---:|
+| Coalesced | 0.0393126 |
+| Non-coalesced | 0.932594 |
+
+**Observed time ratio:** 23.72×
+
+**Observation:** Coalesced memory access was considerably faster in this experiment. However, the non-coalesced implementation accessed a larger memory footprint, so the difference cannot be attributed exclusively to memory coalescing.
+
+## 5. Practical 3: Shared Memory and Synchronization
+
+**Objective:** Compare parallel reduction using global memory and shared memory.
+
+**Configuration:**
+- Elements: 1,048,576
+- Threads per block: 256
+- Blocks: 4,096
+- Repetitions: 100
+
+**Results:**
+
+| Metric | Global Memory | Shared Memory |
+|---|---:|---:|
+| Average time (ms) | 0.0642867 | 0.0644096 |
+| Computed sum | 1,048,576 | 1,048,576 |
+
+**Observation:** Both implementations produced the correct result. Their execution times were nearly identical. GPU caching and synchronization overhead may have influenced the measurements.
+
+The `__syncthreads()` function was used to synchronize threads within each block during reduction.
+
+## 6. Key Learnings
+
+- GPU memory hierarchy affects application performance.
+- Host-device data transfers introduce overhead.
+- Coalesced memory access improves memory efficiency.
+- Shared memory enables efficient communication between threads in a block.
+- `__syncthreads()` ensures synchronization between threads.
+- Performance improvements depend on workload characteristics and GPU architecture.
 
 ## 7. Conclusion
 
-The practical provided hands-on experience with CUDA events, host-device memory transfers, GPU kernel execution, and execution-time measurement.
-
-It also demonstrated why memory transfer overhead must be considered when developing and evaluating GPU-accelerated numerical algorithms such as the Conjugate Gradient method.
-
-## 8. Next Steps
-
-- Study coalesced and non-coalesced memory access.
-- Implement a CUDA shared-memory example.
-- Investigate synchronization between GPU threads.
-- Explore memory optimization techniques for sparse matrix-vector multiplication.
+Week 4 provided practical experience with CUDA memory management, memory access patterns, shared memory, and synchronization. Three experiments were conducted on an NVIDIA Tesla T4 GPU, demonstrating the importance of memory behavior in GPU computing.
