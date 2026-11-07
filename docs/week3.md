@@ -1,41 +1,103 @@
 # Week 3: Introduction to CUDA Programming
 
-## Objective
-Understand the CUDA programming model, kernels, thread indexing, host/device execution, and basic CUDA programming.
+## 1. Objective
 
-## Concepts Learned
+Understand the CUDA programming model, CUDA kernels, thread indexing, host and device execution, and basic CUDA programming.
+
+## 2. Concepts Learned
+
 - CUDA is NVIDIA's parallel computing platform and programming model.
 - The host refers to the CPU side of a CUDA application.
 - The device refers to the GPU.
 - A CUDA kernel executes on the GPU using multiple threads.
-- Thread indexing assigns work to individual data elements.
-- Host-to-device and device-to-host copies transfer data between CPU and GPU memory.
+- Thread indexing assigns work to individual GPU threads.
+- Host-to-device and device-to-host memory transfers move data between CPU and GPU memory.
 
-## Practical Exercise
-**Program:** Vector addition
+## 3. Practical Exercise: Vector Addition
 
-The program calculates:
+**Program:** CUDA Vector Addition
+
+The objective of this practical is to perform element-wise addition of two vectors using GPU parallelism.
+
+The operation is:
 
 C[i] = A[i] + B[i]
 
-It initializes input arrays on the CPU, allocates GPU memory, copies the input arrays to the GPU, launches the CUDA kernel, copies the output back, and validates the results.
+The program performs the following operations:
 
-## Thread Configuration
-- Input elements: 1,000
+1. Initializes two input vectors on the CPU.
+2. Allocates memory on the GPU.
+3. Copies input vectors from host memory to device memory.
+4. Launches a CUDA kernel to perform vector addition.
+5. Synchronizes GPU execution.
+6. Copies the result back to CPU memory.
+7. Validates the computed output.
+
+## 4. CUDA Kernel and Thread Indexing
+
+The CUDA kernel uses the following indexing expression:
+
+i = blockIdx.x * blockDim.x + threadIdx.x
+
+Each thread calculates one element of the output vector.
+
+A bounds check (`i < n`) ensures that threads with indices outside the vector size do not access invalid memory locations.
+
+## 5. Thread Configuration
+
+- Number of input elements: 1,000
 - Threads per block: 256
-- Blocks: 4
+- Number of blocks: 4
 - Total thread positions launched: 1,024
 - Valid elements processed: 1,000
 
-A bounds check prevents the extra thread positions from accessing outside the arrays.
+The number of blocks is calculated as:
 
-## Validation
-Expected result: `Vector addition: PASS`
+Blocks = ceil(1000 / 256) = 4
 
-**Actual status:** Pending execution on a compatible CUDA environment until verified.
+The additional 24 thread positions are handled using the bounds check.
 
-## Relevance to the CG Project
-The exercise introduces kernel launches, parallel indexing, memory allocation, and data transfer. These concepts will be useful when implementing and benchmarking GPU operations relevant to the Conjugate Gradient method.
+## 6. Experimental Environment
 
-## Next Steps
-Study the GPU memory hierarchy and host–device transfer overhead in Week 4.
+- Platform: Google Colab
+- GPU: NVIDIA Tesla T4
+- CUDA Toolkit: 13.0
+- CUDA Compiler: NVCC
+- Programming Language: CUDA C++
+
+## 7. Execution Results
+
+The program was successfully compiled and executed on the NVIDIA Tesla T4 GPU.
+
+**Output:**
+
+```text
+Vector addition: PASS
+Elements: 1000
+Threads per block: 256
+Blocks: 4
+C[0] = 0
+C[10] = 30
+C[999] = 2997
+```
+
+The output was validated against the expected CPU-side calculations.
+
+## 8. Relevance to the Main Project
+
+The practical introduces fundamental CUDA concepts required for implementing GPU-based numerical algorithms.
+
+The concepts of parallel indexing, kernel execution, GPU memory allocation, and host-device data transfer will be useful when implementing the Conjugate Gradient method for solving large sparse linear systems.
+
+## 9. Conclusion
+
+The introductory CUDA vector addition program was successfully implemented, compiled, and executed using a cloud-based NVIDIA GPU.
+
+This practical provided hands-on experience with the CUDA programming model and established the foundation for subsequent GPU memory management, optimization, and numerical computing experiments.
+
+## 10. Next Steps
+
+- Study the GPU memory hierarchy.
+- Understand global, shared, constant, and register memory.
+- Investigate host-device memory transfer overhead.
+- Develop the GPU implementation of the Conjugate Gradient method.
