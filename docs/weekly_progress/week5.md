@@ -31,42 +31,17 @@ The main objectives of Week 5 were:
 
 GPU performance was evaluated using execution time, speedup, throughput, memory bandwidth and occupancy.
 
-Speedup was calculated using:
-
-\[
-Speedup = \frac{T_{CPU}}{T_{GPU}}
-\]
-
-where \(T_{CPU}\) and \(T_{GPU}\) represent CPU and GPU execution times, respectively.
-
 ### 3.2 Memory Coalescing
 
 Memory coalescing refers to combining memory requests from threads within a warp when they access nearby memory locations. Efficient memory access patterns can reduce unnecessary memory transactions and improve GPU performance.
 
 ### 3.3 GPU Occupancy
 
-Occupancy represents the ratio of active warps to the maximum number of supported active warps on a Streaming Multiprocessor (SM).
-
-\[
-Occupancy =
-\frac{Active\ Warps}{Maximum\ Active\ Warps}
-\times 100
-\]
-
 Occupancy is influenced by register usage, shared memory requirements and thread-block configuration.
 
 ### 3.4 CPU–GPU Execution Overhead
 
 GPU applications frequently require data transfers between host memory and device memory.
-
-The overall execution time can be represented as:
-
-\[
-T_{total} =
-T_{H2D}+T_{Kernel}+T_{D2H}+T_{Other}
-\]
-
-Here, H2D represents Host-to-Device transfer and D2H represents Device-to-Host transfer.
 
 ### 3.5 GPU Profiling
 
@@ -112,15 +87,6 @@ A tridiagonal sparse matrix was generated using SciPy and represented in CSR for
 | CPU (SciPy) | 0.503167 ms |
 | GPU (Tesla T4) | 0.137187 ms |
 
-The speedup was calculated as:
-
-\[
-Speedup = \frac{0.503167}{0.137187}
-\]
-
-\[
-\boxed{Speedup \approx 3.67\times}
-\]
 
 **Observation:**
 
@@ -132,12 +98,6 @@ The GPU achieved approximately 3.67 times faster execution than the CPU for the 
 
 The estimated data traffic included matrix values, column indices, row pointers, input vector and output vector.
 
-The effective bandwidth was calculated using:
-
-\[
-B_{effective} =
-\frac{Data\ Traffic}{Execution\ Time}
-\]
 
 **Results:**
 
