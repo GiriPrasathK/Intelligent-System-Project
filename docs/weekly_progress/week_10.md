@@ -1,176 +1,163 @@
-Week 10 – Docker Containerization and GPU Execution
-1. Objective
-The objective of Week 10 was to containerize the Conjugate Gradient (CG) implementation using Docker and verify that GPU computing works inside the Docker container.
+# Week 10 – Containers for GPU Computing
 
-This makes the project easier to reproduce across different environments without manually installing all dependencies.
-2. Environment and Tools
-The following environment and tools were used:
-Component	Specification
-Operating System	Windows 10 Pro
-Linux Environment	Ubuntu on WSL 2
-Container Platform	Docker Desktop
-Docker Engine	29.9.3
-Base Docker Image	nvidia/cuda:12.2.2-devel-ubuntu22.04
-CUDA Version	12.2
-GPU	NVIDIA GeForce GTX 1080 (8 GB VRAM)
-Python	Python 3.10.12 (inside container)
-GPU Programming	Numba CUDA
-Scientific Libraries	NumPy, SciPy, Numba, Pandas, Matplotlib
+**Course:** GPU Computing and Cloud Computing  
+**Project:** Performance and Scalability Analysis of the Conjugate Gradient Method Across CPU, Local GPU, and Cloud GPU Environments  
+**Duration:** October 20 – October 26, 2026  
+**Status:** Completed
 
-3. Files Added
-The following files were created for Docker containerization:
-File	Description
-Dockerfile	Defines the Docker image and installation steps.
-requirements.txt	Lists the Python dependencies required by the project.
-.dockerignore	Excludes unnecessary files from the Docker build context.
-src/cg_docker.py	Contains the CPU and GPU Conjugate Gradient implementations used for Docker testing.
+---
 
-4. Docker Configuration
-Dockerfile
-The Docker image was created using the NVIDIA CUDA development image.
-FROM nvidia/cuda:12.2.2-devel-ubuntu22.04
+## 1. Objective
 
-ENV DEBIAN_FRONTEND=noninteractive
-ENV PYTHONUNBUFFERED=1
+The objective of Week 10 was to understand Docker containerization and establish a reproducible environment for executing GPU-based applications.
 
-RUN apt-get update && apt-get install -y \
-    python3 \
-    python3-pip \
-    python3-dev \
-    build-essential \
-    && rm -rf /var/lib/apt/lists/*
+As part of the project, the existing Conjugate Gradient (CG) implementation was containerized using Docker. GPU access from within the container was configured and tested to verify that CUDA-based computations could execute successfully.
 
-WORKDIR /app
+## 2. Topics Covered
 
-COPY requirements.txt .
+- Docker and containerization.
+- Docker images and containers.
+- GPU-enabled Docker containers.
+- CUDA execution inside containers.
+- Reproducible environments for GPU applications.
 
-RUN python3 -m pip install --no-cache-dir -r requirements.txt
+## 3. Practical Implementation
 
-COPY . .
+### 3.1 Docker Environment Setup
 
-CMD ["python3", "src/cg_docker.py"]
+Docker Desktop was installed and configured with the WSL 2 backend. Ubuntu integration was enabled to execute Docker commands from the Linux environment.
 
+The installation was verified using:
 
-Python Dependencies
-The requirements.txt file contains:
-numpy
-scipy
-numba
-pandas
-matplotlib
+```bash
+docker --version
+docker run hello-world
+```
 
+Both commands executed successfully.
 
-Docker Image Build
-The Docker image was built using:
-docker build -t cg-project:cuda .
+### 3.2 GPU Access Configuration
 
+The NVIDIA CUDA development image was selected as the base image:
 
-The build completed successfully.
-5. GPU Access Verification
-GPU access from Docker was verified using:
-docker run --rm --gpus all cg-project:cuda nvidia-smi
+```text
+nvidia/cuda:12.2.2-devel-ubuntu22.04
+```
 
+GPU passthrough was tested using:
+
+```bash
+docker run --rm --gpus all nvidia/cuda:12.2.2-base-ubuntu22.04 nvidia-smi
+```
 
 The container successfully detected the NVIDIA GeForce GTX 1080 GPU.
 
-The Python CUDA environment was also tested:
-docker run --rm --gpus all cg-project:cuda python3 -c "import numpy, scipy, numba; from numba import cuda; print('NumPy:', numpy.__version__); print('SciPy:', scipy.__version__); print('Numba:', numba.__version__); print('CUDA available:', cuda.is_available()); print('GPU:', cuda.get_current_device().name)"
+### 3.3 Project Containerization
 
+The following files were created:
 
-The output confirmed:
-- NumPy was successfully imported.
-- SciPy was successfully imported.
-- Numba was successfully imported.
-- CUDA was available inside the container.
-- The NVIDIA GeForce GTX 1080 was detected.
-A CUDA vector addition test was also executed successfully, confirming that CUDA kernels could run inside the Docker container.
-6. Conjugate Gradient Implementation
-A separate script, src/cg_docker.py, was created to test the CPU and GPU implementations inside Docker.
-Test Matrix
-A sparse symmetric positive-definite tridiagonal matrix was generated.
+| File | Purpose |
+|---|---|
+| `Dockerfile` | Defines the Docker image configuration and installation steps. |
+| `requirements.txt` | Specifies the required Python libraries. |
+| `.dockerignore` | Excludes unnecessary files from the Docker build context. |
+| `src/cg_docker.py` | Implements CPU and GPU Conjugate Gradient execution for Docker testing. |
 
-The matrix size was:
-\[
-N = 1000
-\]
+The required Python libraries included NumPy, SciPy, Numba, Pandas, and Matplotlib.
 
-The matrix was constructed as:
-\[
-A =
-\begin{bmatrix}
-2 & -1 & 0 & \cdots & 0\\
--1 & 2 & -1 & \cdots & 0\\
-0 & -1 & 2 & \cdots & 0\\
-\vdots & \vdots & \vdots & \ddots & -1\\
-0 & 0 & 0 & -1 & 2
-\end{bmatrix}
-\]
+The Docker image was built using:
 
-The matrix contains 2,998 non-zero elements.
-Execution
-The following operations were performed:
-1. Generated the sparse matrix and right-hand-side vector.
-2. Executed the CPU Conjugate Gradient implementation using SciPy.
-3. Executed the GPU Conjugate Gradient implementation using Numba CUDA.
-4. Measured execution time for both implementations.
-5. Calculated the residual and compared the solutions.
-6. Validated the numerical correctness of both implementations.
-7. Experimental Results
-The following results were obtained from the Docker execution.
-CPU Execution
-Metric	Result
-Convergence Status	0
-Execution Time	0.01844 seconds
-True Residual	\(3.76 \times 10^{-12}\)
-Validation	Passed
+```bash
+docker build -t cg-project:cuda .
+```
 
-GPU Execution
-Metric	Result
-Iterations	500
-Execution Time	1.97998 seconds
-Returned Residual	\(5.19 \times 10^{-13}\)
-True Residual	\(5.19 \times 10^{-13}\)
-Validation	Passed
+The build completed successfully.
 
-CPU vs GPU Comparison
-Metric	Result
-CPU Solution Error	\(1.05 \times 10^{-12}\)
-GPU Solution Error	\(1.13 \times 10^{-12}\)
-CPU-GPU Solution Difference	\(1.23 \times 10^{-12}\)
-GPU Speedup	0.0093×
+### 3.4 CUDA Execution Inside Docker
 
-8. Observations
-- Both CPU and GPU implementations successfully solved the system.
-- The residual values were very small, confirming numerical correctness.
-- The CPU implementation was faster for this particular test case.
-- The GPU implementation took approximately 1.98 seconds, compared to approximately 0.018 seconds for the CPU.
-- Numba generated a performance warning indicating that the grid size was small and could result in GPU under-utilization.
-The GPU's lower performance for this test is expected because the matrix size is relatively small. Kernel launch overhead, synchronization, and data transfer overhead can dominate execution time for smaller workloads.
+The Python environment and CUDA availability were verified inside the container.
 
-This result does not contradict the earlier large-scale benchmark results, where the GPU implementations showed better performance for larger matrices.
-9. GitHub Integration
-The Docker-related files were committed and pushed to the project repository.
+The following checks were performed:
 
-Repository: Intelligent-System-Project
+- Imported NumPy, SciPy, and Numba successfully.
+- Verified CUDA availability using Numba.
+- Detected the NVIDIA GeForce GTX 1080.
+- Executed a CUDA vector addition test successfully.
 
-Commit message:
-Add Docker containerization for CG implementation
+This confirmed that GPU computation was accessible from within the Docker container.
 
+## 4. Conjugate Gradient Execution Inside Docker
 
-Commit hash:
-5d0a3af
+A separate script, `src/cg_docker.py`, was developed to execute and compare the CPU and GPU implementations.
 
+**Test configuration:**
 
-The following files were included in the commit:
-- Dockerfile
-- requirements.txt
-- .dockerignore
-- src/cg_docker.py
-10. Conclusion
-Week 10 successfully completed the Docker containerization of the Conjugate Gradient project.
+| Parameter | Value |
+|---|---|
+| Matrix Size | 1000 × 1000 |
+| Matrix Type | Sparse, symmetric positive-definite |
+| Non-zero Elements | 2998 |
+| GPU | NVIDIA GeForce GTX 1080 |
+| GPU Programming Framework | Numba CUDA |
 
-The project was packaged into a Docker image with the required Python dependencies and CUDA environment. GPU passthrough was verified, and CUDA kernels were successfully executed inside the container.
+A tridiagonal sparse matrix was generated with diagonal elements equal to 2 and off-diagonal elements equal to -1.
 
-The CPU and GPU Conjugate Gradient implementations were also tested within Docker, and both produced numerically valid solutions.
+Both CPU and GPU implementations were executed using the same test problem, and their execution times and numerical accuracy were evaluated.
 
-This establishes a reproducible execution environment for the project and provides a foundation for further scalability testing, performance analysis, and final integration.
+### 4.1 CPU Results
+
+| Metric | Result |
+|---|---:|
+| Convergence Status | 0 |
+| Execution Time | 0.01844 seconds |
+| True Residual | \(3.76 \times 10^{-12}\) |
+| Validation | Passed |
+
+### 4.2 GPU Results
+
+| Metric | Result |
+|---|---:|
+| Number of Iterations | 500 |
+| Execution Time | 1.97998 seconds |
+| Returned Residual | \(5.19 \times 10^{-13}\) |
+| True Residual | \(5.19 \times 10^{-13}\) |
+| Validation | Passed |
+
+### 4.3 CPU and GPU Comparison
+
+| Metric | Result |
+|---|---:|
+| CPU Solution Error | \(1.05 \times 10^{-12}\) |
+| GPU Solution Error | \(1.13 \times 10^{-12}\) |
+| CPU-GPU Solution Difference | \(1.23 \times 10^{-12}\) |
+| GPU Speedup | 0.0093× |
+
+## 5. Observations
+
+1. Both CPU and GPU implementations successfully solved the generated linear system.
+2. The residual values were sufficiently small, confirming the numerical accuracy of both solutions.
+3. The CPU implementation performed significantly faster for the test matrix of size 1000.
+4. The GPU implementation experienced additional overhead from kernel launches, synchronization, and data transfers.
+5. Numba generated a performance warning indicating possible GPU under-utilization because of the small grid size.
+
+The results demonstrate that GPU acceleration does not necessarily improve performance for smaller workloads. The overhead associated with launching GPU kernels can outweigh the benefits of parallel execution.
+
+This observation is consistent with the earlier benchmark results, where GPU performance improved for larger matrix sizes.
+
+## 6. Overall Summary
+
+During Week 10, the Conjugate Gradient project was successfully containerized using Docker.
+
+The Docker environment was configured with the required Python dependencies and CUDA support. GPU passthrough was verified, and CUDA kernels were executed successfully inside the container.
+
+The CPU and GPU implementations were also tested within Docker. Both produced numerically valid solutions, although the CPU performed better for the smaller test matrix.
+
+The work establishes a reproducible environment for running the project and provides a foundation for further scalability and performance evaluation.
+
+## 7. Conclusion
+
+Week 10 successfully completed the containerization and GPU execution requirements. The project is now configured to run inside a Docker environment with NVIDIA GPU support.
+
+This improves the reproducibility and portability of the implementation and provides a foundation for future scalability testing and performance evaluation.
+
+**Next Week:** Week 11 – Distributed and Scalable Cloud Computing.
